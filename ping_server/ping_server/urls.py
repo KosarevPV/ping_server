@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from ping.views import ResponsesModelViewSet
+from ping.views import ResponsesModelViewSet, DomainsModelViewSet, ResponsesQuerysetFilterViewSet
 
 
 router = DefaultRouter()
-router.register('ping', ResponsesModelViewSet)
+router.register('responses', ResponsesModelViewSet)
+router.register('domains', DomainsModelViewSet)
+router.register('responses_f', ResponsesQuerysetFilterViewSet)
 
 
 urlpatterns = [
