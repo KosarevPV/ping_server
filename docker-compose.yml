@@ -4,7 +4,8 @@ version: '3.1'
 services:
   db:
     image: postgres:15.4
-    privileged: true
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
     environment:
@@ -12,15 +13,39 @@ services:
       POSTGRES_PASSWORD: response1
       POSTGRES_DB: response
   backend:
-    build: 
-      context: ./ping_server
+    build: ./ping_server
+    volumes:
+      - static_volume:/home/app/web/staticfiles
     expose:
       - 8080
+    env_file:
+      - ./.env.dev
     command: bash -c "
-      python manage.py migrate ping zero
+      ./wait-for-postgres.sh db
+      && python manage.py migrate ping zero
       && python manage.py migrate
       && python manage.py add_user
-      && python manage.py runserver 0.0.0.0:8080
+      && gunicorn ping_server.wsgi -b 0.0.0.0:8080
       "
     depends_on:
       - db
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    ports:
+      - "8000:80"
+    depends_on:
+      - backend
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - nginx
+
+
+volumes:
+  postgres_data:
+  static_volume:
