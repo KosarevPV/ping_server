@@ -1,0 +1,26 @@
+version: '3.1'
+
+
+services:
+  db:
+    image: postgres:15.4
+    privileged: true
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: db_user
+      POSTGRES_PASSWORD: response1
+      POSTGRES_DB: response
+  backend:
+    build: 
+      context: ./ping_server
+    expose:
+      - 8080
+    command: bash -c "
+      python manage.py migrate ping zero
+      && python manage.py migrate
+      && python manage.py add_user
+      && python manage.py runserver 0.0.0.0:8080
+      "
+    depends_on:
+      - db

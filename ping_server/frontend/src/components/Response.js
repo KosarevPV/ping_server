@@ -1,32 +1,26 @@
 import React from 'react'
 
-const ResponseItem = ({project, deleteProject}) => {
+const ResponseItem = ({domain_name, domain_id, responses}) => {
+    const arr_responses = responses.filter(el => el.domain === domain_id).map(el => `${el.responses_time} / `)
     return (
         <tr>
-            <td>{project.name}</td>
-            <td>{project.repoUrl}</td>
-            <td>{project.users}</td>
-            <td>
-                <button onClick={() => deleteProject(project.id)}
-                        type='button'>Delete
-                </button>
-            </td>
+            <td>{domain_name}</td>
+            <td>{arr_responses}</td>
         </tr>
     )
 }
 
 
-export const ResponseList = ({data}) => {
-    console.log(data.labels)
+export const ResponseList = ({domains, responses}) => {
+
     return (
         <div>
             <table>
                 <tr>
                     <th>Domain</th>
                     <th>Response time</th>
-      
-                    <th></th>
                 </tr>
+                {domains.map((item) => <ResponseItem domain_name={item.domain_name} domain_id={item.id} responses={responses}/>)}
             </table>
         </div>
 

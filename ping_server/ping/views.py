@@ -12,10 +12,3 @@ class ResponsesModelViewSet(ModelViewSet):
 class DomainsModelViewSet(ModelViewSet):
     queryset = Domains.objects.all()
     serializer_class = DomainsModelSerializer
-
-
-class ResponsesQuerysetFilterViewSet(ModelViewSet):
-    queryset = Responses.objects.all()
-    serializer_class = ResponsesModelSerializer
-    filterset_fields = ['domain']
-

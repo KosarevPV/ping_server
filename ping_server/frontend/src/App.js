@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import './App.css';
 import {BrowserRouter, Route, Switch} from "react-router-dom";
 
@@ -9,50 +8,31 @@ import ResponseList from  "./components/Response";
 
 class App extends React.Component {
     constructor(props) {
-    super(props)
-        this.state = {
-            data: {
-                labels: [],
-                datasets: [],
-              },
-        }
+    super(props);
+    this.state = { domains: [], responses: []};
+    this.loadData = this.loadData.bind(this);
     }
 
+
+    async loadData() {
+        try {
+            const domains_res = await fetch('http://127.0.0.1:8000/api/domains/');
+            const responses_res = await fetch('http://127.0.0.1:8000/api/responses/');
+            const domains_data = await domains_res.json();
+            const responses_data = await responses_res.json();
+            this.setState({
+                domains: domains_data,
+                responses: responses_data
+            })
+        } catch (e) {
+            console.log(e);
+        }
+      }
+        
+
     componentDidMount() {
-    //     axios.get('http://127.0.0.1:8000/api/domains/')
-    //                 .then(response => {
-    //                     this.setState(
-    //                         {
-    //                             data: response.data
-    //                         }
-    //                     )}).catch(error => console.log(error))
-
-        axios.get('http://127.0.0.1:8000/api/domains/')
-            .then(response => {
-                let domains = response.data
-                domains.map((domain) => (
-                    axios.get(`http://127.0.0.1:8000/api/responses_f/?domain=${domain.id}`)
-                    .then(response => { 
-                        let res_domain = response.data
-                        let values = res_domain.map((item) => item.responses_time)
-                        
-                        if (this.state.data['labels'].length < ((Math.ceil((values.length/6)+1))*6)) {
-                            for(var i=this.state.data['labels'].length;i<((Math.ceil((values.length/6)+1))*6);i++){
-                                this.state.data['labels'].push(i);
-                            }
-                        }
-
-                        if (this.state.data['datasets'].find((item) => item.label === domain.domain_name) === undefined) {
-                            this.state.data['datasets'].push({
-                                label: domain.domain_name,
-                                data: values,  
-                            })
-                        }                 
-                    }
-                    )
-                )
-                )
-            }).catch(error => console.log(error))
+        this.loadData()
+        setInterval(this.loadData, 30000)
     };
 
     render () {
@@ -63,7 +43,7 @@ class App extends React.Component {
                     <div>
                         <Switch>
                             <Route exact path='/chart' component={() =>
-                                <ResponseList data={this.state.data}
+                                <ResponseList domains={this.state.domains} responses={this.state.responses}
                                 />}/>
                         </Switch>
                     </div>
