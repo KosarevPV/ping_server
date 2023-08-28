@@ -24,9 +24,9 @@ services:
       ./wait-for-postgres.sh db
       && python manage.py migrate ping zero
       && python manage.py migrate
-      && python manage.py add_user
-      && gunicorn ping_server.wsgi -b 0.0.0.0:8080
-      "
+      && python manage.py add_data
+      && python manage.py collectstatic --no-input --clear
+      && gunicorn ping_server.wsgi -b 0.0.0.0:8080"
     depends_on:
       - db
   nginx:
@@ -43,8 +43,31 @@ services:
       - "80:80"
     depends_on:
       - nginx
-
-
+  redis:
+    image: redis:alpine
+    ports:
+    - '6379:6379'
+  celery:
+    restart: always
+    build:
+      context: ./ping_server
+    command: celery -A ping_server worker -l info
+    volumes:
+      - .:/ping_server
+    depends_on:
+      - db
+      - redis
+      - backend
+  celery-beat:
+    build: ./ping_server
+    command: celery -A ping_server beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/ping_server
+    depends_on:
+      - db
+      - redis
+      - backend
+      - celery
 volumes:
   postgres_data:
   static_volume:

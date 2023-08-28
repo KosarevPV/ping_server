@@ -6,9 +6,7 @@ from pathlib import Path
 
 import chardet
 from celery import shared_task
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
+from ping_server.settings import BASE_DIR
 
 PATH = os.path.join(BASE_DIR, 'server.log')
 
@@ -33,8 +31,7 @@ def save_response_time(domain_id):
 
     domain = Domains.objects.get(pk=int(domain_id))
 
-    args = ['ping', '-c', '1', domain.domain_name]
-    res_ping = subprocess.Popen(args, stdout=subprocess.PIPE)
+    res_ping = subprocess.Popen(['ping', '-c', '1', domain.domain_name], stdout=subprocess.PIPE)
     for line in res_ping.stdout:
         str_line = line.decode(encoding=chardet.detect(line)['encoding'])
         if "icmp_seq" in str_line:

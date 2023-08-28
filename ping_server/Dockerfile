@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 
 RUN apt-get update
-RUN apt-get install -y postgresql postgresql-contrib libpq-dev python3-dev
+RUN apt-get install -y postgresql postgresql-contrib libpq-dev python3-dev iputils-ping
 
 RUN pip3 install --upgrade pip
 
